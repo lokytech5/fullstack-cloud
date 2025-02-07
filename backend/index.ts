@@ -1,6 +1,5 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 
-import mongoose from 'mongoose';
 import connectDB from './db';
 import { articlesRouter } from './routers/articlesRouter';
 
