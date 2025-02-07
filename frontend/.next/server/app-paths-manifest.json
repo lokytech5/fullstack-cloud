@@ -1,6 +1,4 @@
 {
   "/page": "app/page.js",
-  "/manage-articles/page": "app/manage-articles/page.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/manage-articles/page": "app/manage-articles/page.js"
 }
