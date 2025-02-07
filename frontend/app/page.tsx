@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ArticlePage from "./article/page";
 
 export default function Home() {
@@ -10,11 +11,17 @@ export default function Home() {
         </div>
         <div className="flex-none">
           <ul className="menu menu-horizontal px-1 space-x-4 hidden md:flex">
-            <li><a className="btn btn-ghost">Home</a></li>
-            <li><a className="btn btn-ghost">Articles</a></li>
-            <li><a className="btn btn-ghost">About</a></li>
-            <li><a className="btn btn-primary">Post Article</a></li>
-          </ul>
+          <li>
+            <Link href="/manage-articles" className="btn btn-primary">
+              Articles
+            </Link>
+          </li>
+          <li>
+            <Link href="/about" className="btn btn-ghost">
+              About
+            </Link>
+          </li>
+        </ul>
           
           {/* Mobile Menu Button */}
           <div className="dropdown dropdown-end md:hidden">
@@ -22,10 +29,21 @@ export default function Home() {
               ☰
             </label>
             <ul tabIndex={0} className="menu dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
-              <li><a>Home</a></li>
-              <li><a>Articles</a></li>
-              <li><a>About</a></li>
-              <li><a className="btn btn-primary">Post Article</a></li>
+               <li>
+              <Link href="/" className="btn btn-ghost">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link href="/manage-articles" className="btn btn-primary">
+                Articles
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" className="btn btn-ghost">
+                About
+              </Link>
+            </li>
             </ul>
           </div>
         </div>
