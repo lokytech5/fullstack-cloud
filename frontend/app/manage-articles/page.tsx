@@ -66,10 +66,13 @@ const ManageArticles: React.FC = () => {
         <h1 className="text-4xl font-bold flex items-center gap-3">
           📄 Manage Articles
         </h1>
-        <button className="btn btn-success flex items-center gap-2">
-          <Link href="/"><FiFilePlus /></Link>
-          New Article
-        </button>
+        <Link href="/">
+  <button className="btn btn-success flex items-center gap-2">
+    <FiFilePlus />
+    New Article
+  </button>
+</Link>
+
       </div>
 
       {/* Articles Table */}
