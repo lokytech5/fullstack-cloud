@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 15, "column": 0}, "map": {"version":3,"sources":["file:///Users/lokosman/Desktop/code/cloud/fullstack-web/frontend/app/provider.tsx"],"sourcesContent":["\"use client\"\nimport { QueryClient, QueryClientProvider } from \"@tanstack/react-query\";\n\nconst queryClient = new QueryClient();\n\n\nfunction Providers({children}: {children: React.ReactNode}) {\n    return (\n        <QueryClientProvider client={queryClient}>\n            {children}\n        </QueryClientProvider>\n    )\n}\n\nexport default Providers;"],"names":[],"mappings":";;;;AACA;AAAA;AADA;;;AAGA,MAAM,cAAc,IAAI,6KAAA,CAAA,cAAW;AAGnC,SAAS,UAAU,EAAC,QAAQ,EAA8B;IACtD,qBACI,8OAAC,sLAAA,CAAA,sBAAmB;QAAC,QAAQ;kBACxB;;;;;;AAGb;uCAEe"}},
+    {"offset": {"line": 36, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
+}

@@ -3,14 +3,14 @@ import { model, Schema } from "mongoose";
 interface Article {
     title: string;
     content: string;
-    categories: string | string[];
+    category: string;
     author: string;
 }
 
 const articleSchema = new Schema<Article>({
     title: { type: String, required: true },
     content: { type: String, required: true },
-    categories: { type: [String], required: true },
+    category: { type: String, required: true },
     author: { type: String, required: true },
 })
 

@@ -14,6 +14,10 @@ export const getAllArticle = async (req: Request, res: Response) => {
 export const createArtcile = async(req:Request, res:Response) => {
     try {
 
+      if(typeof req.body.category !== "string") {
+        return res.status(400).json({ message: "Category must be a single string"})
+      }
+
         const article = new Article(req.body);
         await article.save();
         res.status(201).json({ message: "Article created successfully", article });
@@ -26,17 +30,19 @@ export const updateArticleById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     console.log("Received ID:", id); // Debugging
-
-    const updateData = req.body; 
-    console.log("Update Data:", updateData); // Debugging
-
+    
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid article ID format" });
     }
 
+    // Ensure category is a single string
+    if (req.body.category && typeof req.body.category !== "string") {
+        return res.status(400).json({ message: "Category must be a single string" });
+    }
+
     const updatedArticle = await Article.findByIdAndUpdate(
       id, 
-      updateData, 
+      req.body, 
       { new: true, runValidators: true }
     );
 

@@ -1,36 +1,28 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FormData, schema } from "../schemaValidation";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-interface ArticleData {
-  title: string;
-  content: string;
-  category: string;
-  author: string;
-}
+import useFetchArticle from "../useFetchArticle";
+import { showToast } from "../ToastNotifier";
 
 const ArticlePage = () => {
-  const [formData, setFormData] = useState<ArticleData>({
-    title: "",
-    content: "",
-    category: "",
-    author: "",
-  });
 
-  const { register, handleSubmit, formState: {errors} } = useForm<FormData>({
+  const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
     resolver: zodResolver(schema)
   })
 
-  const handleChange = () => {
-    
-  };
+  const { mutateAsync, isPending, error } = useFetchArticle();
 
-  const onSubmit: SubmitHandler<FormData> = (data, event) => {
-    event?.preventDefault();
-    console.log('Form submitted', data);
-  }
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    try {
+      const response = await mutateAsync(data);
+      showToast('Article submitted successfully', 'success');
+      reset(); // Reset form after successful submission
+    } catch (error) {
+      console.error("Submission error:", error);
+    }
+  };
 
   return (
     <div className="w-full max-w-2xl shadow-lg rounded-lg p-8">
@@ -66,11 +58,9 @@ const ArticlePage = () => {
         <div className="form-control">
           <label className="label font-semibold text-gray-700">Category</label>
           <select
+            {...register('category')}
             name="category"
-            value={formData.category}
-            onChange={handleChange}
             className="select select-bordered w-full px-4 py-3 rounded-md focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-            required
           >
             <option value="">Select a Category</option>
             <option value="Technology">Technology</option>
@@ -78,12 +68,14 @@ const ArticlePage = () => {
             <option value="Books">Books</option>
             <option value="Lifestyle">Lifestyle</option>
           </select>
+          {errors.category && <p className="text-red-500">{errors.category.message}</p>}
         </div>
 
         {/* Author Name */}
         <div className="form-control">
           <label className="label font-semibold text-gray-700">Author</label>
           <input
+          {...register("author")}
             type="text"
             placeholder="Enter your name..."
             className="input input-bordered w-full px-4 py-3 rounded-md focus:ring-2 focus:ring-blue-500 transition-all duration-200"
@@ -96,9 +88,12 @@ const ArticlePage = () => {
             type="submit"
             className="btn btn-primary w-full text-lg px-6 py-3 rounded-md transition-all duration-200 hover:bg-blue-600 focus:ring-2 focus:ring-blue-400"
           >
-            🚀 Publish Article
+           {isPending ? "🚀 Publish...": "🚀 Publish Article"} 
           </button>
         </div>
+
+        {/* Error Message */}
+        {error && <p className="text-red-500 text-center mt-2">{error.message}</p>}
       </form>
     </div>
   );
