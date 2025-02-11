@@ -21,7 +21,7 @@ const ArticlePage = () => {
   
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      const response = await mutateAsync(data);
+      await mutateAsync(data);
       showToast('Article submitted successfully', 'success');
       router.push('/manage-articles')
       reset(); // Reset form after successful submission
