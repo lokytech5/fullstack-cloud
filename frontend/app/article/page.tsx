@@ -5,8 +5,11 @@ import { FormData, schema } from "../schemaValidation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useFetchArticle from "../useFetchArticle";
 import { showToast } from "../ToastNotifier";
+import { useRouter } from "next/navigation";
 
 const ArticlePage = () => {
+
+  const router = useRouter();
 
   const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
     resolver: zodResolver(schema)
@@ -14,10 +17,13 @@ const ArticlePage = () => {
 
   const { mutateAsync, isPending, error } = useFetchArticle();
 
+  
+  
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
       const response = await mutateAsync(data);
       showToast('Article submitted successfully', 'success');
+      router.push('/manage-articles')
       reset(); // Reset form after successful submission
     } catch (error) {
       console.error("Submission error:", error);

@@ -1,78 +1,64 @@
 "use client";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FiEdit, FiTrash2, FiFilePlus } from "react-icons/fi";
-
-interface Article {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  author: string;
-}
+import useFetchList from "../useFetchList";
+import useFetchUpdatedArticle from "../useFetchArticleUpdate";
+import useFetchDeleteArticle from "../useFetchDeleteArticle";
+import { ArticleListResponse } from "../types";
 
 const ManageArticles: React.FC = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const { data: articles, isPending, error } = useFetchList();
+  const mutationUpdate = useFetchUpdatedArticle();
+  const mutationDelete = useFetchDeleteArticle();
 
-  // Fetch all articles
-  // useEffect(() => {
-  //   fetch("/api/articles") // Adjust API route
-  //     .then((res) => res.json())
-  //     .then((data) => setArticles(data))
-  //     .catch((err) => console.error("Error fetching articles:", err));
-  // }, []);
+  const [selectedArticle, setSelectedArticle] = useState<ArticleListResponse | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Delete an article
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this article?")) return;
+  if (isPending) return <p className="text-center text-lg">Loading...</p>;
+  if (error) return <p className="text-center text-red-500">Error Fetching articles: {error.message}</p>;
 
-    try {
-      await fetch(`/api/articles/${id}`, { method: "DELETE" });
-      setArticles(articles.filter((article) => article.id !== id));
-    } catch (error) {
-      console.error("Error deleting article:", error);
+  const openModal = (article: ArticleListResponse) => {
+    setSelectedArticle(article);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedArticle(null);
+  };
+
+  const handleUpdate = () => {
+    if (selectedArticle) {
+      mutationUpdate.mutate(selectedArticle, {
+        onSuccess: () => {
+          closeModal();
+        },
+      });
     }
   };
 
-  // Update an article
-  const handleUpdate = async () => {
-    if (!selectedArticle) return;
+  const handleDelete = (id: string) => {
+    if (!confirm("Are you sure you want to delete this article?")) return;
 
-    try {
-      const res = await fetch(`/api/articles/${selectedArticle.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(selectedArticle),
-      });
-
-      if (res.ok) {
-        setArticles(
-          articles.map((article) =>
-            article.id === selectedArticle.id ? selectedArticle : article
-          )
-        );
-        setIsEditing(false);
-      }
-    } catch (error) {
-      console.error("Error updating article:", error);
-    }
+    mutationDelete.mutate(id, {
+      onSuccess: () => {
+        // Optimistically remove the article from UI
+        window.location.reload(); // Refresh to get latest data (temporary fix)
+      },
+    });
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold flex items-center gap-3">
-          📄 Manage Articles
-        </h1>
+        <h1 className="text-4xl font-bold">📄 Manage Articles</h1>
         <Link href="/">
-  <button className="btn btn-success flex items-center gap-2">
-    <FiFilePlus />
-    New Article
-  </button>
-</Link>
-
+          <button className="btn btn-success flex items-center gap-2">
+            <FiFilePlus />
+            New Article
+          </button>
+        </Link>
       </div>
 
       {/* Articles Table */}
@@ -83,39 +69,39 @@ const ManageArticles: React.FC = () => {
               <th className="p-3">Title</th>
               <th className="p-3">Author</th>
               <th className="p-3">Category</th>
+              <th className="p-3">Content</th>
               <th className="p-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {articles.length > 0 ? (
+            {articles && articles.length > 0 ? (
               articles.map((article) => (
-                <tr key={article.id} className="hover:bg-gray-600 transition">
+                <tr key={article._id} className="hover:bg-gray-600 transition">
                   <td className="p-3">{article.title}</td>
                   <td className="p-3">{article.author}</td>
                   <td className="p-3">{article.category}</td>
+                  <td className="p-3">{article.content}</td>
                   <td className="p-3 flex gap-2 justify-center">
                     <button
                       className="btn btn-primary btn-sm flex items-center gap-1"
-                      onClick={() => {
-                        setSelectedArticle(article);
-                        setIsEditing(true);
-                      }}
+                      onClick={() => openModal(article)}
                     >
                       <FiEdit /> Edit
                     </button>
 
                     <button
                       className="btn btn-error btn-sm flex items-center gap-1"
-                      onClick={() => handleDelete(article.id)}
+                      onClick={() => handleDelete(article._id)}
+                      disabled={mutationDelete.isPending}
                     >
-                      <FiTrash2 /> Delete
+                      {mutationDelete.isPending ? "Deleting..." : <><FiTrash2 /> Delete</>}
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="text-center p-4">
+                <td colSpan={5} className="text-center p-4 text-gray-400">
                   No articles found.
                 </td>
               </tr>
@@ -125,50 +111,59 @@ const ManageArticles: React.FC = () => {
       </div>
 
       {/* Edit Modal */}
-      {isEditing && selectedArticle && (
-        <div className="modal modal-open">
-          <div className="modal-box bg-gray-800 text-white">
-            <h2 className="text-2xl font-bold">Edit Article</h2>
+      {isModalOpen && selectedArticle && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-gray-800 p-6 rounded-lg w-96 shadow-lg">
+            <h2 className="text-2xl font-bold mb-4">Edit Article</h2>
 
-            <label className="label mt-3">Title</label>
+            <label className="block text-sm font-medium">Title</label>
             <input
               type="text"
               value={selectedArticle.title}
               onChange={(e) => setSelectedArticle({ ...selectedArticle, title: e.target.value })}
-              className="input input-bordered w-full bg-gray-700 text-white"
+              className="input input-bordered w-full bg-gray-700 text-white mb-3"
             />
 
-            <label className="label mt-3">Content</label>
+            <label className="block text-sm font-medium">Content</label>
             <textarea
               value={selectedArticle.content}
               onChange={(e) => setSelectedArticle({ ...selectedArticle, content: e.target.value })}
-              className="textarea textarea-bordered w-full bg-gray-700 text-white"
+              className="textarea textarea-bordered w-full bg-gray-700 text-white mb-3"
             ></textarea>
 
-            <label className="label mt-3">Category</label>
+            <label className="block text-sm font-medium">Category</label>
             <input
               type="text"
               value={selectedArticle.category}
               onChange={(e) => setSelectedArticle({ ...selectedArticle, category: e.target.value })}
-              className="input input-bordered w-full bg-gray-700 text-white"
+              className="input input-bordered w-full bg-gray-700 text-white mb-3"
             />
 
-            <label className="label mt-3">Author</label>
+            <label className="block text-sm font-medium">Author</label>
             <input
               type="text"
               value={selectedArticle.author}
               onChange={(e) => setSelectedArticle({ ...selectedArticle, author: e.target.value })}
-              className="input input-bordered w-full bg-gray-700 text-white"
+              className="input input-bordered w-full bg-gray-700 text-white mb-3"
             />
 
-            <div className="modal-action">
-              <button onClick={handleUpdate} className="btn btn-primary">
-                Save
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-2 mt-4">
+              <button
+                onClick={handleUpdate}
+                className="btn btn-primary"
+                disabled={mutationUpdate.isPending}
+              >
+                {mutationUpdate.isPending ? "Updating..." : "Save"}
               </button>
-              <button onClick={() => setIsEditing(false)} className="btn btn-secondary">
+              <button onClick={closeModal} className="btn btn-secondary">
                 Cancel
               </button>
             </div>
+
+            {/* Mutation Feedback */}
+            {mutationUpdate.error && <p className="text-red-500 mt-2">{mutationUpdate.error.message}</p>}
+            {mutationUpdate.isSuccess && <p className="text-green-500 mt-2">Article updated successfully!</p>}
           </div>
         </div>
       )}
