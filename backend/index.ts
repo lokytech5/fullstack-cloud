@@ -8,7 +8,7 @@ import cors from "cors"
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:3000", // Allow frontend URLs
+    origin: ["http://fullstack.dostech.solutions"], // Allow frontend URLs
     allowedHeaders: ["Content-Type", "Authorization", "Accept"]
 }));
 
@@ -16,5 +16,5 @@ app.use(cors({
 app.use(express.json());
 app.use('/api/articles', articlesRouter);
 
-app.listen(8000, () => console.log(`listening to port ${8000}`));
+app.listen(8000, "0.0.0.0",() => console.log(`listening to port ${8000}`));
 connectDB();
