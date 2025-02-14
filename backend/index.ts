@@ -8,7 +8,7 @@ import cors from "cors"
 const app = express();
 
 app.use(cors({
-    origin: ["http://fullstack.dostech.solutions"], // Allow frontend URLs
+    origin: ["http://fullstack.dostech.solutions", "http://full-stack-ALB-337628920.us-east-1.elb.amazonaws.com"],
     allowedHeaders: ["Content-Type", "Authorization", "Accept"]
 }));
 
