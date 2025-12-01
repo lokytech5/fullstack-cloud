@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { validateArticle } from "../validator/articleValidator";
 import { validateRequest } from "../middleware/articleMiddleware";
 import { createArtcile, deleteAllArticles, deleteArticleById, getAllArticle, updateArticleById } from "../controller/articleController";
